@@ -68,21 +68,26 @@ def add_command_line_args_to_variant_spec(variant_spec, command_line_args):
 
     variant_spec['restore'] = command_line_args.restore
 
-    return variant_spec
+ 
+    return variant_spec#checkpoint 'checkpoint_replay_pool'：[ 'run_params' ]
 
-
+#生成实验trainble_class example_module.get_trainable_class（mopo/examples/development/__init__.py）
+#[ 'run_params' ]
 def generate_experiment(trainable_class, variant_spec, command_line_args):
-    params = variant_spec.get('algorithm_params')
+    params = variant_spec.get('algorithm_params')#params的由来，是从variant_spec来的，和algorithm_params有关，variant_spec['algorithm_params']['kwargs']['pool_load_max_size']
     local_dir = os.path.join(params.get('log_dir'), params.get('domain'))
+    #the default [`log_dir`](examples/config/halfcheetah/0.py#L7). '~/ray_mopo/'
+    #DEFAULT_DOMAIN = 'HalfCheetah' domain = '-'.join(domain_task_parts[:1])domain = environment_params['training']['domain'] 'domain': 'Hopper',
     resources_per_trial = _normalize_trial_resources(
         command_line_args.resources_per_trial,
         command_line_args.trial_cpus,
         command_line_args.trial_gpus,
         command_line_args.trial_extra_cpus,
         command_line_args.trial_extra_gpus)
-
-    experiment_id = params.get('exp_name')
-
+    #实验资源，用什么来训练
+    experiment_id = params.get('exp_name')#实验的名字，id，#params的由来，是从variant_spec来的，和algorithm_params有关
+    #'exp_name'：'halfcheetah_medium_expert'
+    
     #### add pool_load_max_size to experiment_id
     if 'pool_load_max_size' in variant_spec['algorithm_params']['kwargs']:
         max_size = variant_spec['algorithm_params']['kwargs']['pool_load_max_size']
@@ -105,7 +110,7 @@ def generate_experiment(trainable_class, variant_spec, command_line_args):
             return trial_name_template.format(trial=trial)
 
         return tune.function(trial_name_creator)
-
+#实验说明：run：trainable_class,config:variant_spec;采样数；restore
     experiment = {
         'run': trainable_class,
         'resources_per_trial': resources_per_trial,
@@ -123,7 +128,7 @@ def generate_experiment(trainable_class, variant_spec, command_line_args):
     }
 
     return experiment_id, experiment
-
+#实验生成结束
 
 def unique_cluster_name(args):
     cluster_name_parts = (
@@ -135,7 +140,7 @@ def unique_cluster_name(args):
     cluster_name = "-".join(cluster_name_parts).lower()
     return cluster_name
 
-
+#实验的其他信息info,试验次数，采样数，总试验数
 def get_experiments_info(experiments):
     number_of_trials = {
         experiment_id: len(list(
@@ -201,7 +206,7 @@ Number of total trials (including samples/seeds): {total_number_of_trials}
 
     print(experiments_info_text)
 
-
+#run_local本地实验，模块，参数，参数，训练，ID，实验训练——experiment runner，
 def run_example_local(example_module_name, example_argv, local_mode=False):
     """Run example locally, potentially parallelizing across cpus/gpus."""
     example_module = importlib.import_module(example_module_name)
