@@ -13,9 +13,9 @@ import numpy as np
 import tensorflow as tf
 from tensorflow.python.training import training_util
 
-from softlearning.algorithms.rl_algorithm import RLAlgorithm
+from softlearning.algorithms.rl_algorithm imports
 from softlearning.replay_pools.simple_replay_pool import SimpleReplayPool
-
+ #nsoftlearning的算法和缓冲区
 from mopo.models.constructor import construct_model, format_samples_for_training
 from mopo.models.fake_env import FakeEnv
 from mopo.utils.writer import Writer
@@ -23,12 +23,14 @@ from mopo.utils.visualization import visualize_policy
 from mopo.utils.logging import Progress
 import mopo.utils.filesystem as filesystem
 import mopo.off_policy.loader as loader
+#从mopo的模型建造、fake_env(???????)、写、可视化的策略、日志里的过程、文件系统、mopo的off policy加载 #重要 这里的装载能否成装载评估策略的地方？
 
+#定义TD_target
 
-def td_target(reward, discount, next_value):
+def td_target(reward, discount, next_value
     return reward + discount * next_value
 
-
+#mopo类
 class MOPO(RLAlgorithm):
     """Model-based Offline Policy Optimization (MOPO)
 
@@ -38,7 +40,8 @@ class MOPO(RLAlgorithm):
         MOPO: Model-based Offline Policy Optimization. 
         arXiv preprint arXiv:2005.13239. 2020.
     """
-
+#mopo类的初始化（self，训练环境，评估环境，策略，q值，缓冲区，静态函数，画图，tf总结，学习速率，奖赏比例，目标熵，折扣，tau，目标的更新间隔，动作的先验，重参数化，存储其它的策略信息，deterministic，
+#，是否随意的rollout，训练模型的评率，网络数目，网络精英，rollout的长度，隐藏层的维度，模型的类型时mlp，）
     def __init__(
             self,
             training_environment,
@@ -105,13 +108,14 @@ class MOPO(RLAlgorithm):
                 the policy derived using the reparameterization trick. We use
                 a likelihood ratio based estimator otherwise.
         """
-
+#MOPO 的环境就是softlearning的环境，这个环境是用来训练的，policy是一个网络，初始化的探索策略，Q值用的是最小值，缓冲区，画图，学习速率，折扣，tau，目标更新间隔，
         super(MOPO, self).__init__(**kwargs)
-
+#训练环境观察的维度，训练环境动作维度
         obs_dim = np.prod(training_environment.active_observation_shape)
         act_dim = np.prod(training_environment.action_space.shape)
         self._model_type = model_type
         self._identity_terminal = identity_terminal
+#模型由构造模型的函数决定（观察维度，动作维度，隐藏层维度，网络数目，精英数目，模型类型，平均值与方差，名字就是模型的名字，加载dir也是模型的dir，deterministic就是deterministic）              
         self._model = construct_model(obs_dim=obs_dim, act_dim=act_dim, hidden_dim=hidden_dim,
                                       num_networks=num_networks, num_elites=num_elites,
                                       model_type=model_type, separate_mean_var=separate_mean_var,
@@ -130,14 +134,16 @@ class MOPO(RLAlgorithm):
         self._deterministic = deterministic
         self._rollout_random = rollout_random
         self._real_ratio = real_ratio
-
+#log_dir的getcwd
         self._log_dir = os.getcwd()
         self._writer = Writer(self._log_dir)
-
+#evaluation评估的环境是否可以换？ 重要 
         self._training_environment = training_environment
         self._evaluation_environment = evaluation_environment
         self._policy = policy
-
+        print('##################policy {}##########'.format(policy))
+#策略！ 重要
+#这个policy是来自于哪里的？ 重要
         self._Qs = Qs
         self._Q_targets = tuple(tf.keras.models.clone_model(Q) for Q in Qs)
 
@@ -189,9 +195,9 @@ class MOPO(RLAlgorithm):
         self._init_placeholders()
         self._init_actor_update()
         self._init_critic_update()
-
+#build开始，训练开始，初始化
     def _train(self):
-        
+#开始mopo训练，训练环境，策略policy用来训练，初始化探索策略 重要 可以把initial_exploration_policy设置为none 不再另行policy，       
         """Return a generator that performs RL training.
 
         Args:
@@ -201,6 +207,7 @@ class MOPO(RLAlgorithm):
                 If None, then all exploration is done using policy
             pool (`PoolBase`): Sample pool to add samples to
         """
+#训练环境，评估环境，策略，缓冲区，设置模型特征
         training_environment = self._training_environment
         evaluation_environment = self._evaluation_environment
         policy = self._policy
@@ -235,9 +242,9 @@ class MOPO(RLAlgorithm):
 
             self._epoch_before_hook()
             gt.stamp('epoch_before_hook')
-
+#训练进程
             self._training_progress = Progress(self._epoch_length * self._n_train_repeat)
-            start_samples = self.sampler._total_samples
+            start_samples = self.sampler._total_samples#开始采样
             for timestep in count():
                 self._timestep = timestep
 
@@ -282,7 +289,7 @@ class MOPO(RLAlgorithm):
                 evaluation_metrics = {}
 
             gt.stamp('epoch_after_hook')
-
+#评估路径， 重要 self._evaluation_paths
             sampler_diagnostics = self.sampler.get_diagnostics()
 
             diagnostics = self.get_diagnostics(
@@ -338,6 +345,7 @@ class MOPO(RLAlgorithm):
 
     def _log_policy(self):
         save_path = os.path.join(self._log_dir, 'models')
+        print('*********save path*********'.format(save_path))
         filesystem.mkdir(save_path)
         weights = self._policy.get_weights()
         data = {'policy_weights': weights}
