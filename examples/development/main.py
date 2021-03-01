@@ -66,7 +66,7 @@ class ExperimentRunner(tune.Trainable):
             variant, training_environment)
         policy = self.policy = get_policy_from_variant(
             variant, training_environment, Qs)#策略，Qs，训练环境 重要 还是换这个？
-        initial_exploration_policy = self.initial_exploration_policy = (
+          initial_exploration_policy = self.initial_exploration_policy = (
             get_policy('UniformPolicy', training_environment))#初始化探索策略，Uniform,训练环境
 
         #### get termination function
@@ -204,6 +204,31 @@ class ExperimentRunner(tune.Trainable):
         self.policy.set_weights(picklable['policy_weights'])
         initial_exploration_policy = self.initial_exploration_policy = (
             get_policy('UniformPolicy', training_environment))
+        #def get_policy(policy_type, *args, **kwargs):
+#     return POLICY_FUNCTIONS[policy_type](*args, **kwargs)
+#def get_policy_from_variant(variant, env, Qs, *args, **kwargs):
+#     policy_params = variant['policy_params']
+
+#examples/development/base.py 环境参数
+
+
+def get_policy_from_variant(variant, env, Qs, *args, **kwargs):
+    policy_params = variant['policy_params']
+    policy_type = policy_params['type']
+    policy_kwargs = deepcopy(policy_params['kwargs'])
+
+    preprocessor_params = policy_kwargs.pop('preprocessor_params', None)
+    preprocessor = get_preprocessor_from_params(env, preprocessor_params)
+
+    policy = POLICY_FUNCTIONS[policy_type](
+        env,
+        *args,
+        Q=Qs[0],
+        preprocessor=preprocessor,
+        **policy_kwargs,
+        **kwargs)
+
+    return policy
 
         self.algorithm = get_algorithm_from_variant(
             variant=self._variant,
