@@ -26,7 +26,7 @@ class BNN:
     with ensembling).
     """
     def __init__(self, params):
-        """Initializes a class instance.
+        """Initializes a class instance.#重要
 
         Arguments:
             params (DotMap): A dotmap of model parameters.
@@ -42,8 +42,9 @@ class BNN:
                     If None, creates a session with its own associated graph. Defaults to None.
         """
         self.name = get_required_argument(params, 'name', 'Must provide name.')
+        #重要 是不是在这里改model_dir？？？？？
         self.model_dir = params.get('model_dir', None)
-
+#重要 可以改，如果迁移的是模型，
         print('[ BNN ] Initializing model: {} | {} networks | {} elites'.format(params['name'], params['num_networks'], params['num_elites']))
         if params.get('sess', None) is None:
             config = tf.ConfigProto()
@@ -70,7 +71,7 @@ class BNN:
         self.sy_pred_in3d, self.sy_pred_mean3d_fac, self.sy_pred_var3d_fac = None, None, None
 
         self.separate_mean_var = params.get('separate_mean_var', False)
-
+#可以加载模型
         if params.get('load_model', False):
             if self.model_dir is None:
                 raise ValueError("Cannot load model without providing model directory.")
@@ -92,7 +93,7 @@ class BNN:
             self.var_layers = []
         else:
             self.var_layers = None
-
+#在这里使用ensemble， ensemble几个神经网络，NN
         if self.num_nets == 1:
             print("Created a neural network with variance predictions.")
         else:
@@ -366,12 +367,12 @@ class BNN:
     #################
     # Model Methods #
     #################
-
+#训练bnn
     def train(self, inputs, targets,
               batch_size=32, max_epochs=None, max_epochs_since_update=5,
               hide_progress=False, holdout_ratio=0.0, max_logging=1000, max_grad_updates=None, timer=None, max_t=None):
         """Trains/Continues network training
-
+#训练bnn，输入：dataset的行，目标，最小批用来训练的，epochs，hide——progress
         Arguments:
             inputs (np.ndarray): Network inputs in the training dataset in rows.
             targets (np.ndarray): Network target outputs in the training dataset in rows corresponding
@@ -498,7 +499,7 @@ class BNN:
         # return np.sort(holdout_losses)[]
 
         # pdb.set_trace()
-
+#BNN预测，分布，
     def predict(self, inputs, factored=False, *args, **kwargs):
         """Returns the distribution predicted by the model for each input vector in inputs.
         Behavior is affected by the dimensionality of inputs and factored as follows:
@@ -548,10 +549,10 @@ class BNN:
                        tf.reduce_mean(factored_variance, axis=0)
             return mean, variance
         return factored_mean, factored_variance
-
+#保存，重现模型的两个文件，一个包含了模型结构，一个包含了网络中的所有变量；保存的目录 重要 这个可以变
     def save(self, savedir, timestep):
         """Saves all information required to recreate this model in two files in savedir
-        (or self.model_dir if savedir is None), one containing the model structuure and the other
+        (or self.model_dir if savedir is None), one containing the model structure and the other
         containing all variables in the network.
 
         savedir (str): (Optional) Path to which files will be saved. If not provided, self.model_dir
@@ -583,7 +584,7 @@ class BNN:
         for i, var_val in enumerate(self.sess.run(self.nonoptvars + self.optvars)):
             var_vals[str(i)] = var_val
         savemat(os.path.join(model_dir, '{}_{}.mat'.format(self.name, timestep)), var_vals)
-
+#加载已经有的模型的结构
     def _load_structure(self):
         """Uses the saved structure in self.model_dir with the name of this network to initialize
         the structure of this network.
