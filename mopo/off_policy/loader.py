@@ -5,6 +5,7 @@ import gzip
 import pdb
 import numpy as np
 
+#恢复原状，恢复缓冲区，replay
 def restore_pool(replay_pool, experiment_root, max_size, save_path=None):
     if 'd4rl' in experiment_root:
         restore_pool_d4rl(replay_pool, experiment_root[5:])
@@ -124,3 +125,4 @@ def restore_pool_contiguous(replay_pool, load_path):
         'rewards': rewards,
         'terminals': dones.astype(bool)
     })
+#replay pool缓冲区
