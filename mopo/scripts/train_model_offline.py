@@ -27,7 +27,10 @@ def main(args):
                             num_networks=args.num_networks, num_elites=args.num_elites,
                             model_type=args.model_type, separate_mean_var=args.separate_mean_var,
                             name=model_name(args))
-
+#重要 应该在这里添加
+#def construct_model(obs_dim=11, act_dim=3, rew_dim=1, hidden_dim=200, num_networks=7,
+# 					num_elites=5, session=None, model_type='mlp', separate_mean_var=False,
+# 					name=None, load_dir=None, deterministic=False):
     dataset['rewards'] = np.expand_dims(dataset['rewards'], 1)
     train_inputs, train_outputs = format_samples_for_training(dataset)
     model.train(train_inputs, train_outputs,
