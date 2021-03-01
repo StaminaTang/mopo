@@ -10,7 +10,7 @@ import pdb
 
 
 class FC:
-    """Represents a fully-connected layer in a network.
+    """Represents a fully-connected layer in a network.#如果模型的结构就是fc
     """
     _activations = {
         None: tf.identity,
