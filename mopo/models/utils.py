@@ -5,6 +5,7 @@ from __future__ import absolute_import
 import tensorflow as tf
 import numpy as np
 
+#定义取得argument, 包含dotmap，key，信息等
 def get_required_argument(dotmap, key, message, default=None):
     val = dotmap.get(key, default)
     if val is default:
